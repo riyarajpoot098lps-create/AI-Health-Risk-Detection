@@ -1,9 +1,5 @@
 from flask import Flask, render_template, request, jsonify
 import pickle
-from google import genai   # ✅ correct import
-
-# ---------- GEMINI SETUP ----------
-client = genai.Client(api_key="AIzaSyD46LLYgo6bxBRlul9tW1fz0Q0INuMLTVQ")  # ⚠️ replace
 
 app = Flask(__name__)
 
@@ -27,7 +23,7 @@ def predict():
 
         bmi = round(weight / ((height / 100) ** 2), 2)
 
-        input_data = [[0,120,bp,20,80,bmi,0.5,age]]
+        input_data = [[0, 120, bp, 20, 80, bmi, 0.5, age]]
         prediction = model.predict(input_data)
 
         diabetes = ("High", 80) if prediction[0] == 1 else ("Low", 30)
@@ -45,13 +41,16 @@ def predict():
     except Exception as e:
         return f"Error: {e}"
 
+
 # ---------- CHATBOT ----------
 @app.route('/chat', methods=['POST'])
 def chat():
-    user_msg = request.json['message'].lower()
+    user_msg = request.json.get("message", "").lower()
 
-    # 🔥 SMART LOGIC
-    if "bp" in user_msg or "pressure" in user_msg:
+    if "hi" in user_msg or "hello" in user_msg:
+        reply = "Hello! How can I help you with your health today?"
+
+    elif "bp" in user_msg or "pressure" in user_msg:
         reply = "To reduce BP:\n- Reduce salt\n- Exercise daily\n- Avoid stress\n- Check BP regularly"
 
     elif "diabetes" in user_msg or "sugar" in user_msg:
@@ -61,18 +60,25 @@ def chat():
         reply = "Heart care tips:\n- Daily exercise\n- No smoking\n- Healthy diet\n- Regular checkups"
 
     elif "walk" in user_msg:
-        reply = "Yes! Walking daily improves heart health, fitness, and mood."
+        reply = "Walking daily improves heart health and mood."
 
     elif "weight" in user_msg:
         reply = "To reduce weight:\n- Eat less junk food\n- Exercise daily\n- Stay hydrated"
 
     elif "diet" in user_msg:
-        reply = "Healthy diet includes:\n- Fruits\n- Vegetables\n- Low sugar\n- Balanced meals"
+        reply = "Healthy diet includes:\n- Fruits\n- Vegetables\n- Balanced meals"
+
+    elif "sleep" in user_msg:
+        reply = "Take at least 7-8 hours of sleep daily for good health."
+
+    elif "water" in user_msg:
+        reply = "Drink at least 7-8 glasses of water daily."
 
     else:
-        reply = "Stay healthy by eating well, exercising, and sleeping properly."
+        reply = "Maintain a healthy lifestyle with proper diet and exercise."
 
     return jsonify({'reply': reply})
+
 
 # ---------- RUN ----------
 if __name__ == "__main__":
